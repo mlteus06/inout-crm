@@ -70,31 +70,45 @@ const Dashboard = () => {
       </div>
       {!account ? (
         <div className="card">
-          <p className="card__title">Crie sua conta</p>
-          <p className="card__meta">Defina o nome da sua empresa para começar.</p>
-          <form
-            className="form form--stack"
-            onSubmit={async (event) => {
-              event.preventDefault()
-              if (!session?.user?.id) return
-              const result = await createAccount(session.user.id, accountName || 'Minha conta')
-              if (result.error) {
-                alert(result.error)
-                return
-              }
-              setAccountName('')
-              refresh()
-            }}
-          >
-            <input
-              value={accountName}
-              onChange={(event) => setAccountName(event.target.value)}
-              placeholder="Nome da empresa"
-              required
-            />
-            <button className="btn btn--primary" type="submit">
-              Salvar conta
-            </button>
+          {error ? (
+            <>
+              <p className="card__title">Não foi possível carregar sua conta</p>
+              <p className="card__meta">Tente novamente em alguns instantes.</p>
+              <button className="btn btn--primary" type="button" onClick={refresh}>
+                Recarregar dados
+              </button>
+              <p className="notice">Detalhe do erro: {error}</p>
+            </>
+          ) : (
+            <>
+              <p className="card__title">Crie sua conta</p>
+              <p className="card__meta">Defina o nome da sua empresa para começar.</p>
+              <form
+                className="form form--stack"
+                onSubmit={async (event) => {
+                  event.preventDefault()
+                  if (!session?.user?.id) return
+                  const result = await createAccount(session.user.id, accountName || 'Minha conta')
+                  if (result.error) {
+                    alert(result.error)
+                    return
+                  }
+                  setAccountName('')
+                  refresh()
+                }}
+              >
+                <input
+                  value={accountName}
+                  onChange={(event) => setAccountName(event.target.value)}
+                  placeholder="Nome da empresa"
+                  required
+                />
+                <button className="btn btn--primary" type="submit">
+                  Salvar conta
+                </button>
+              </form>
+            </>
+          )}
           </form>
         </div>
       ) : (
