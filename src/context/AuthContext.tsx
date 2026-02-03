@@ -1,0 +1,69 @@
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { supabase } from '../lib/supabase'
+
+type SessionUser = {
+  id: string
+  email?: string
+}
+
+type AuthContextValue = {
+  session: { user: SessionUser } | null
+  loading: boolean
+}
+
+const AuthContext = createContext<AuthContextValue>({ session: null, loading: true })
+
+export const useAuth = () => useContext(AuthContext)
+
+const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [session, setSession] = useState<AuthContextValue['session']>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const client = supabase
+    if (!client) {
+      setLoading(false)
+      return
+    }
+
+    client.auth
+      .getSession()
+      .then(({ data }) => {
+        setSession((data.session as AuthContextValue['session']) ?? null)
+        if (data.session?.user?.id && data.session?.user?.email) {
+          client.from('profiles').upsert({
+            user_id: data.session.user.id,
+            email: data.session.user.email,
+          })
+          client.rpc('accept_invites')
+        }
+      })
+      .catch(() => {
+        setSession(null)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+
+    const { data: subscription } = client.auth.onAuthStateChange(async (_event, nextSession) => {
+      setSession((nextSession as AuthContextValue['session']) ?? null)
+      if (nextSession?.user?.id && nextSession?.user?.email) {
+        await client.from('profiles').upsert({
+          user_id: nextSession.user.id,
+          email: nextSession.user.email,
+        })
+        await client.rpc('accept_invites')
+      }
+    })
+
+    return () => {
+      subscription.subscription.unsubscribe()
+    }
+  }, [])
+
+  const value = useMemo(() => ({ session, loading }), [session, loading])
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}
+
+export default AuthProvider
