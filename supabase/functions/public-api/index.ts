@@ -92,48 +92,32 @@ Deno.serve(
     return json(200, { data: data ?? [] })
   }
 
-  if (req.method === 'POST') {
-    const payload = await req.json().catch(() => null)
-    if (!payload?.name) {
-      return json(400, { error: 'name é obrigatório.' })
-    }
-
-    const { data, error } = await supabase
-      .from('leads')
-      .insert({
-        account_id: accountId,
-        name: payload.name,
-        email: payload.email ?? null,
-        phone: payload.phone ?? null,
-        notes: payload.notes ?? null,
-        status: payload.status ?? 'nova',
-        source: payload.source ?? 'API Pública',
-      })
-      .select('id,name,email,phone,notes,status,source,created_at')
-      .single()
-
-    if (error) {
-      return json(400, { error: error.message })
-    }
-
-    return json(201, { data })
-  }
-  
-if (req.method === 'POST') {
-  if (
-    resourceParts.length !== 3 ||
-    resourceParts[0] !== 'leads' ||
-    resourceParts[2] !== 'status'
-  ) {
-    return json(404, { error: 'Rota não encontrada.' })
+if (req.method === 'POST' && resourceParts.length === 1 && resourceParts[0] === 'leads') {
+  const payload = await req.json().catch(() => null)
+  if (!payload?.name) {
+    return json(400, { error: 'name é obrigatório.' })
   }
 
-  const leadId = resourceParts[1]
-  const body = await req.json()
+  const { data, error } = await supabase
+    .from('leads')
+    .insert({
+      account_id: accountId,
+      name: payload.name,
+      email: payload.email ?? null,
+      phone: payload.phone ?? null,
+      notes: payload.notes ?? null,
+      status: payload.status ?? 'nova',
+      source: payload.source ?? 'API Pública',
+    })
+    .select('id,name,email,phone,notes,status,source,created_at')
+    .single()
 
-  if (!body.status) {
-    return json(400, { error: 'Status é obrigatório.' })
+  if (error) {
+    return json(400, { error: error.message })
   }
+
+  return json(201, { data })
+}
 
   const { error } = await supabase
     .from('leads')
