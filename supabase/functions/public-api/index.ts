@@ -1,5 +1,8 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+/* ===============================
+   Supabase client (service role)
+================================ */
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
 const supabaseServiceKey =
   Deno.env.get('SERVICE_ROLE_KEY') ??
@@ -8,13 +11,16 @@ const supabaseServiceKey =
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
+/* ===============================
+   Helpers
+================================ */
 const json = (status: number, body: Record<string, unknown>) =>
   new Response(JSON.stringify(body), {
     status,
     headers: {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET,POST,PATCH,OPTIONS',
+      'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
     },
   })
 
@@ -24,10 +30,13 @@ const cors = () =>
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Headers': 'content-type,x-api-key',
-      'Access-Control-Allow-Methods': 'GET,POST,PATCH,OPTIONS',
+      'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
     },
   })
 
+/* ===============================
+   API Key → Account
+================================ */
 const getAccountByKey = async (apiKey: string) => {
   const { data } = await supabase
     .from('api_keys')
@@ -45,8 +54,12 @@ const getAccountByKey = async (apiKey: string) => {
   return data?.account_id ?? null
 }
 
+/* ===============================
+   Edge Function
+================================ */
 Deno.serve(
   async (req) => {
+    /* ---------- CORS ---------- */
     if (req.method === 'OPTIONS') {
       return cors()
     }
@@ -65,6 +78,7 @@ Deno.serve(
       'perdida',
     ])
 
+    /* ---------- Auth ---------- */
     const apiKey = req.headers.get('x-api-key')
     if (!apiKey) {
       return json(401, { error: 'API key ausente.' })
@@ -75,32 +89,47 @@ Deno.serve(
       return json(401, { error: 'API key inválida.' })
     }
 
-    /* =======================
-       GET /public-api/leads
-    ======================= */
-    if (req.method === 'GET' && resourceParts[0] === 'leads') {
-      const status = url.searchParams.get('status')
-      const source = url.searchParams.get('source')
-      const limit = Number(url.searchParams.get('limit') ?? '50')
+    /* =====================================================
+       1️⃣ POST /leads/:id/status  (ATUALIZA STATUS)
+    ===================================================== */
+    if (
+      req.method === 'POST' &&
+      resourceParts.length === 3 &&
+      resourceParts[0] === 'leads' &&
+      resourceParts[2] === 'status'
+    ) {
+      const leadId = resourceParts[1]
+      const payload = await req.json().catch(() => null)
 
-      let query = supabase
+      if (!payload?.status || !allowedStatuses.has(payload.status)) {
+        return json(400, { error: 'status inválido.' })
+      }
+
+      const { data, error } = await supabase
         .from('leads')
-        .select('id,name,email,phone,notes,status,source,created_at')
+        .update({ status: payload.status })
+        .eq('id', leadId)
         .eq('account_id', accountId)
-        .order('created_at', { ascending: false })
-        .limit(Number.isNaN(limit) ? 50 : limit)
+        .select(
+          'id,name,email,phone,notes,status,source,created_at'
+        )
+        .single()
 
-      if (status) query = query.eq('status', status)
-      if (source) query = query.eq('source', source)
+      if (error) {
+        return json(400, { error: error.message })
+      }
 
-      const { data } = await query
-      return json(200, { data: data ?? [] })
+      return json(200, { data })
     }
 
-    /* =======================
-       POST /public-api/leads
-    ======================= */
-    if (req.method === 'POST' && resourceParts.length === 1 && resourceParts[0] === 'leads') {
+    /* =====================================================
+       2️⃣ POST /leads  (CRIA LEAD)
+    ===================================================== */
+    if (
+      req.method === 'POST' &&
+      resourceParts.length === 1 &&
+      resourceParts[0] === 'leads'
+    ) {
       const payload = await req.json().catch(() => null)
 
       if (!payload?.name) {
@@ -118,7 +147,9 @@ Deno.serve(
           status: payload.status ?? 'nova',
           source: payload.source ?? 'API Pública',
         })
-        .select('id,name,email,phone,notes,status,source,created_at')
+        .select(
+          'id,name,email,phone,notes,status,source,created_at'
+        )
         .single()
 
       if (error) {
@@ -128,55 +159,38 @@ Deno.serve(
       return json(201, { data })
     }
 
-    /* =================================
-   POST /public-api/leads/:id/status
-================================= */
-if (
-  req.method === 'POST' &&
-  resourceParts.length === 3 &&
-  resourceParts[0] === 'leads' &&
-  resourceParts[2] === 'status'
-) {
-  const leadId = resourceParts[1]
-  const payload = await req.json().catch(() => null)
+    /* =====================================================
+       3️⃣ GET /leads  (LISTA)
+    ===================================================== */
+    if (
+      req.method === 'GET' &&
+      resourceParts.length === 1 &&
+      resourceParts[0] === 'leads'
+    ) {
+      const status = url.searchParams.get('status')
+      const source = url.searchParams.get('source')
+      const limit = Number(url.searchParams.get('limit') ?? '50')
 
-  if (!payload?.status || !allowedStatuses.has(payload.status)) {
-    return json(400, { error: 'status inválido.' })
-  }
-
-  const { data, error } = await supabase
-    .from('leads')
-    .update({ status: payload.status })
-    .eq('id', leadId)
-    .eq('account_id', accountId)
-    .select('id,name,email,phone,notes,status,source,created_at')
-    .single()
-
-  if (error) {
-    return json(400, { error: error.message })
-  }
-
-  return json(200, { data })
-}
-
-      const { data, error } = await supabase
+      let query = supabase
         .from('leads')
-        .update({ status: payload.status })
-        .eq('id', leadId)
+        .select(
+          'id,name,email,phone,notes,status,source,created_at'
+        )
         .eq('account_id', accountId)
-        .select('id,name,email,phone,notes,status,source,created_at')
-        .single()
+        .order('created_at', { ascending: false })
+        .limit(Number.isNaN(limit) ? 50 : limit)
 
-      if (error) {
-        return json(400, { error: error.message })
-      }
+      if (status) query = query.eq('status', status)
+      if (source) query = query.eq('source', source)
 
-      return json(200, { data })
+      const { data } = await query
+      return json(200, { data: data ?? [] })
     }
 
+    /* ---------- Fallback ---------- */
     return json(405, { error: 'Método não permitido.' })
   },
   {
-    verify_jwt: false,
+    verify_jwt: false, // API pública com x-api-key
   }
 )
