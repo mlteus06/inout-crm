@@ -7,7 +7,7 @@ type SessionUser = {
 }
 
 type AuthContextValue = {
-  session: { user: SessionUser } | null
+  session: { user: SessionUser; access_token?: string } | null
   loading: boolean
 }
 
