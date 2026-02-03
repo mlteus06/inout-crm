@@ -38,31 +38,36 @@ const Integrations = () => {
   }, [account?.id])
 
   const fetchPages = async (accountId: string) => {
-    setLoadingPages(true)
-    const res = await fetch(`${supabaseUrl}/functions/v1/facebook-pages`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ account_id: accountId }),
-    })
-    const body = await res.json().catch(() => ({}))
-    if (res.ok) {
-      setPages(body.data ?? [])
-      if (body.data?.length === 1) {
-        const page = body.data[0]
-        setPageId(page.id)
-        setPageName(page.name)
-        const updated = await upsertIntegration(accountId, {
-          page_id: page.id,
-          page_name: page.name,
-          ad_account_id: adAccountId,
-        })
-        setIntegration(updated)
-        setMessage('Página vinculada automaticamente.')
+    try {
+      setLoadingPages(true)
+      const res = await fetch(`${supabaseUrl}/functions/v1/facebook-pages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ account_id: accountId }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (res.ok) {
+        setPages(body.data ?? [])
+        if (body.data?.length === 1) {
+          const page = body.data[0]
+          setPageId(page.id)
+          setPageName(page.name)
+          const updated = await upsertIntegration(accountId, {
+            page_id: page.id,
+            page_name: page.name,
+            ad_account_id: adAccountId,
+          })
+          setIntegration(updated)
+          setMessage('Página vinculada automaticamente.')
+        }
+      } else {
+        setMessage(body.error ?? 'Não foi possível listar páginas.')
       }
-    } else {
-      setMessage(body.error ?? 'Não foi possível listar páginas.')
+    } catch (_error) {
+      setMessage('Falha ao conectar com a função de páginas.')
+    } finally {
+      setLoadingPages(false)
     }
-    setLoadingPages(false)
   }
 
   useEffect(() => {
