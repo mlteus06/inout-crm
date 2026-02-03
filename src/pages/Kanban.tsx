@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import KanbanColumn from '../components/KanbanColumn'
 import useAccount from '../hooks/useAccount'
-import { Lead, LeadStatus, listLeads, updateLeadStatus } from '../lib/leads'
+import { listLeads, updateLeadStatus, type Lead, type LeadStatus } from '../lib/leads'
 
 const statuses: LeadStatus[] = ['nova', 'em_contato', 'qualificada', 'perdida']
 

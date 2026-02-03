@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { Account, getAccountForUser } from '../lib/leads'
+import { getAccountForUser, type Account } from '../lib/leads'
 
 const useAccount = () => {
   const { session } = useAuth()

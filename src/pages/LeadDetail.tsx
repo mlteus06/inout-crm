@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Lead, LeadStatus, getLead, updateLeadStatus } from '../lib/leads'
+import { getLead, updateLeadStatus, type Lead, type LeadStatus } from '../lib/leads'
 
 const LeadDetail = () => {
   const { id } = useParams()

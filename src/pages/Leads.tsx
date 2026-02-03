@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import LeadCard from '../components/LeadCard'
 import useAccount from '../hooks/useAccount'
-import { Lead, LeadStatus, createLead, listLeads } from '../lib/leads'
+import { createLead, listLeads, type Lead, type LeadStatus } from '../lib/leads'
 
 const Leads = () => {
   const { account } = useAccount()

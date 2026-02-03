@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import StatCard from '../components/StatCard'
 import useAccount from '../hooks/useAccount'
-import { Lead, createAccount, listLeads } from '../lib/leads'
+import { createAccount, listLeads, type Lead } from '../lib/leads'
 import { useAuth } from '../context/AuthContext'
 
 const Dashboard = () => {
