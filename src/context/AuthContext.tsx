@@ -26,6 +26,11 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return
     }
 
+    const timeoutId = window.setTimeout(() => {
+      setSession(null)
+      setLoading(false)
+    }, 6000)
+
     client.auth
       .getSession()
       .then(({ data }) => {
@@ -42,6 +47,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(null)
       })
       .finally(() => {
+        window.clearTimeout(timeoutId)
         setLoading(false)
       })
 
@@ -57,6 +63,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     })
 
     return () => {
+      window.clearTimeout(timeoutId)
       subscription.subscription.unsubscribe()
     }
   }, [])
