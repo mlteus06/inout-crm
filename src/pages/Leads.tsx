@@ -88,14 +88,14 @@ const Leads = () => {
 
           <div className="toolbar">
             <div className="toolbar__filters">
-              {(['todos', 'nova', 'em_contato', 'qualificada', 'perdida'] as const).map((status) => (
+            {(['todos', 'nova', 'em_contato', 'qualificada', 'convertido', 'desqualificado', 'perdida'] as const).map((status) => (
                 <button
                   key={status}
                   type="button"
                   className={`btn btn--ghost ${filter === status ? 'is-active' : ''}`}
                   onClick={() => setFilter(status)}
                 >
-                  {status === 'todos' ? 'Todos' : status.replace('_', ' ')}
+                  {statusLabels[status]}
                 </button>
               ))}
             </div>
