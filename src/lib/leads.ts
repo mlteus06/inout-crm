@@ -35,6 +35,7 @@ export const getAccountForUser = async (userId: string) => {
     .from('account_members')
     .select('account_id')
     .eq('user_id', userId)
+    .limit(1)
     .maybeSingle()
 
   if (error) {
@@ -55,6 +56,29 @@ export const getAccountForUser = async (userId: string) => {
     if (accountData) {
       return { account: accountData as Account, error: null }
     }
+  }
+
+  const { data: ownerAccount, error: ownerError } = await supabase
+    .from('accounts')
+    .select('id,name')
+    .eq('owner_id', userId)
+    .limit(1)
+    .maybeSingle()
+
+  if (ownerError) {
+    return { account: null, error: ownerError.message }
+  }
+
+  if (ownerAccount) {
+    await supabase.from('account_members').upsert(
+      {
+        account_id: ownerAccount.id,
+        user_id: userId,
+        role: 'owner',
+      },
+      { onConflict: 'account_id,user_id' },
+    )
+    return { account: ownerAccount as Account, error: null }
   }
 
   return { account: null, error: null }
