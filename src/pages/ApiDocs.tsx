@@ -129,6 +129,10 @@ const ApiDocs = () => {
               <span>Payload</span>
               <p>name, email, phone, notes, source, status</p>
             </div>
+            <p className="api__text">
+              Status suportados: <strong>nova</strong>, <strong>em_contato</strong>, <strong>qualificada</strong>,{' '}
+              <strong>convertido</strong>, <strong>desqualificado</strong>, <strong>perdida</strong>.
+            </p>     
           </div>
 
           <div className="api__block">
@@ -143,6 +147,21 @@ const ApiDocs = () => {
             </div>
           </div>
 
+          <div className="api__block">
+            <p className="api__title">PATCH /leads/:id/status</p>
+            <p className="api__text">
+              Mova o lead entre os quadros (altere o status).
+            </p>
+            <div className="api__example">
+              <span>Endpoint</span>
+              <p>{supabaseUrl}/functions/v1/public-api/leads/&lt;id&gt;/status</p>
+            </div>
+            <div className="api__example">
+              <span>Payload</span>
+              <p>status</p>
+            </div>
+          </div>
+          
           {/* WEBHOOKS */}
           <div id="webhooks" className="api__block">
             <p className="api__title">POST /webhooks</p>
