@@ -118,6 +118,8 @@ const Dashboard = () => {
             <StatCard title="Novas Leads" value={stats.nova} subtitle="Chegaram hoje" highlight />
             <StatCard title="Em contato" value={stats.em_contato} subtitle="Em andamento" />
             <StatCard title="Qualificadas" value={stats.qualificada} subtitle="Prontas para proposta" />
+            <StatCard title="Convertidas" value={stats.convertido} subtitle="Viraram clientes" />
+            <StatCard title="Desqualificadas" value={stats.desqualificado} subtitle="Fora do perfil" />
             <StatCard title="Perdidas" value={stats.perdida} subtitle="Motivos a revisar" />
           </div>
           <div className="panel">
