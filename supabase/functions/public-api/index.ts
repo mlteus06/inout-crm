@@ -12,7 +12,7 @@ const json = (status: number, body: Record<string, unknown>) =>
     headers: {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'content-type,x-api-key',
+      'Access-Control-Allow-Methods': 'GET,POST,PATCH,OPTIONS',
       'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
     },
   })
@@ -23,7 +23,7 @@ const cors = () =>
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Headers': 'content-type,x-api-key',
-      'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+      'Access-Control-Allow-Methods': 'GET,POST,PATCH,OPTIONS',
     },
   })
 
@@ -49,6 +49,19 @@ Deno.serve(async (req) => {
     return cors()
   }
 
+    const url = new URL(req.url)
+  const pathParts = url.pathname.split('/').filter(Boolean)
+  const baseIndex = pathParts.indexOf('public-api')
+  const resourceParts = baseIndex === -1 ? [] : pathParts.slice(baseIndex + 1)
+  const allowedStatuses = new Set([
+    'nova',
+    'em_contato',
+    'qualificada',
+    'convertido',
+    'desqualificado',
+    'perdida',
+  ])
+  
   const apiKey = req.headers.get('x-api-key')
   if (!apiKey) {
     return json(401, { error: 'API key ausente.' })
@@ -60,7 +73,7 @@ Deno.serve(async (req) => {
   }
 
   if (req.method === 'GET') {
-    const url = new URL(req.url)
+    
     const status = url.searchParams.get('status')
     const source = url.searchParams.get('source')
     const limit = Number(url.searchParams.get('limit') ?? '50')
@@ -105,6 +118,32 @@ Deno.serve(async (req) => {
 
     return json(201, { data })
   }
+  
+  if (req.method === 'PATCH') {
+    if (resourceParts.length !== 3 || resourceParts[0] !== 'leads' || resourceParts[2] !== 'status') {
+      return json(404, { error: 'Rota não encontrada.' })
+    }
 
+    const leadId = resourceParts[1]
+    const payload = await req.json().catch(() => null)
+    if (!payload?.status || !allowedStatuses.has(payload.status)) {
+      return json(400, { error: 'status inválido.' })
+    }
+
+    const { data, error } = await supabase
+      .from('leads')
+      .update({ status: payload.status })
+      .eq('id', leadId)
+      .eq('account_id', accountId)
+      .select('id,name,email,phone,notes,status,source,created_at')
+      .single()
+
+    if (error) {
+      return json(400, { error: error.message })
+    }
+
+    return json(200, { data })
+  }
+  
   return json(405, { error: 'Método não permitido.' })
 })
