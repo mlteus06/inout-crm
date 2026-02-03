@@ -44,7 +44,8 @@ const getAccountByKey = async (apiKey: string) => {
   return data?.account_id ?? null
 }
 
-Deno.serve(async (req) => {
+Deno.serve(
+  async (req) => {
   if (req.method === 'OPTIONS') {
     return cors()
   }
@@ -144,6 +145,9 @@ Deno.serve(async (req) => {
 
     return json(200, { data })
   }
-  
   return json(405, { error: 'Método não permitido.' })
-})
+  },
+  {
+    verify_jwt: false, // 🔥 ISSO RESOLVE TUDO
+  }
+)
