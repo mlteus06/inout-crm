@@ -20,6 +20,7 @@ const ApiDocs = () => {
   const handleCreateKey = async (event: React.FormEvent) => {
     event.preventDefault()
     if (!account?.id) return
+
     const created = await createApiKey(account.id, label || 'Chave principal')
     if (created) {
       setKeys((prev) => [created, ...prev])
@@ -29,17 +30,25 @@ const ApiDocs = () => {
 
   return (
     <section className="page-section">
+      {/* HEADER */}
       <div className="section__header">
         <div>
           <p className="eyebrow">API Docs</p>
           <h2>Documentação completa e amigável.</h2>
         </div>
       </div>
-      
+
+      {/* LAYOUT */}
+      <div className="api__layout">
+        {/* ASIDE */}
+        <aside className="api__aside">
+          <a className="api__link" href="#auth">Autenticação</a>
+          <a className="api__link" href="#leads">Leads</a>
           <a className="api__link" href="#webhooks">Webhooks</a>
           <a className="api__link" href="#errors">Erros</a>
         </aside>
 
+        {/* CONTENT */}
         <div className="api__content">
           {/* AUTH */}
           <div id="auth" className="api__block">
@@ -57,9 +66,7 @@ const ApiDocs = () => {
             </div>
 
             <p className="api__text">
-              O <strong>token</strong> é o JWT da sessão do usuário: você obtém ao fazer login via
-              Supabase Auth (ex.: <code>supabase.auth.signInWithPassword</code> ou{' '}
-              <code>supabase.auth.getSession()</code>).
+              O <strong>token</strong> é o JWT da sessão do usuário.
             </p>
 
             <div className="api__example">
@@ -95,9 +102,8 @@ const ApiDocs = () => {
                   <button className="btn btn--ghost" type="submit">
                     Gerar chave
                   </button>
-
-          {/* API KEY */}
                 </form>
+
                 <div className="panel__list">
                   {keys.map((key) => (
                     <div className="panel__item" key={key.id}>
