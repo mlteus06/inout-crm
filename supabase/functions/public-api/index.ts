@@ -22,7 +22,7 @@ const cors = () =>
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Headers': 'content-type,x-api-key',
-      'Access-Control-Allow-Methods': 'GET,POST,PATCH,OPTIONS',
+      'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
     },
   })
 
@@ -119,10 +119,33 @@ Deno.serve(
     return json(201, { data })
   }
   
-  if (req.method === 'PATCH') {
-    if (resourceParts.length !== 3 || resourceParts[0] !== 'leads' || resourceParts[2] !== 'status') {
-      return json(404, { error: 'Rota não encontrada.' })
-    }
+if (req.method === 'POST') {
+  if (
+    resourceParts.length !== 3 ||
+    resourceParts[0] !== 'leads' ||
+    resourceParts[2] !== 'status'
+  ) {
+    return json(404, { error: 'Rota não encontrada.' })
+  }
+
+  const leadId = resourceParts[1]
+  const body = await req.json()
+
+  if (!body.status) {
+    return json(400, { error: 'Status é obrigatório.' })
+  }
+
+  const { error } = await supabase
+    .from('leads')
+    .update({ status: body.status })
+    .eq('id', leadId)
+
+  if (error) {
+    return json(500, { error: error.message })
+  }
+
+  return json(200, { success: true })
+}
 
     const leadId = resourceParts[1]
     const payload = await req.json().catch(() => null)
