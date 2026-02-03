@@ -23,7 +23,6 @@ const ApiDocs = () => {
       setLabel('')
     }
   }
-
   return (
     <section className="page-section">
       <div className="section__header">
