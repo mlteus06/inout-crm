@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import type { Account } from '../lib/leads'
-import { getAccountForUser } from '../lib/leads'
+import { createAccount, getAccountForUser } from '../lib/leads'
 
 const useAccount = () => {
   const { session } = useAuth()
@@ -30,6 +30,17 @@ const useAccount = () => {
     try {
       const { account: acct, error: fetchError } = await getAccountForUser(session.user.id)
       if (!mountedRef.current) return
+      if (!acct && !fetchError) {
+        const fallbackName = session.user.email?.split('@')[0] || 'Minha conta'
+        const { account: createdAccount, error: createError } = await createAccount(
+          session.user.id,
+          fallbackName,
+        )
+        if (!mountedRef.current) return
+        setAccount(createdAccount)
+        setError(createError)
+        return
+      }
       setAccount(acct)
       setError(fetchError)
     } finally {
