@@ -43,6 +43,12 @@ const useAccount = () => {
       }
       setAccount(acct)
       setError(fetchError)
+    } catch (err) {
+      if (!mountedRef.current) return
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        return
+      }
+      setError('Erro ao carregar conta.')
     } finally {
       window.clearTimeout(timeoutId)
       if (!mountedRef.current) return
