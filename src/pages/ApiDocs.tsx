@@ -51,6 +51,13 @@ const ApiDocs = () => {
               <p>Authorization: Bearer &lt;token&gt;</p>
               <p>apikey: &lt;anon ou service key&gt;</p>
             </div>
+            <p className="api__text">
+              O <strong>token</strong> é o JWT da sessão do usuário: você obtém ao fazer login via
+              Supabase Auth (ex.: <code>supabase.auth.signInWithPassword</code> ou
+              <code>supabase.auth.getSession()</code>). Em testes no navegador, use o token retornado
+              pelo login. Em backend, gere o token com o usuário autenticado; não use a service key no
+              client.
+            </p>
           </div>
           <div className="api__block">
             <p className="api__title">API Key</p>
@@ -78,6 +85,11 @@ const ApiDocs = () => {
                     </div>
                   ))}
                 </div>
+              </>
+            )}
+          </div>
+          <div id="leads" className="api__block">
+            <p className="api__title">POST /leads</p>
               </>
             )}
           </div>
