@@ -4,7 +4,7 @@ import useAccount from '../hooks/useAccount'
 import type { Lead, LeadStatus } from '../lib/leads'
 import { listLeads, updateLeadStatus } from '../lib/leads'
 
-const statuses: LeadStatus[] = ['nova', 'em_contato', 'qualificada', 'perdida']
+const statuses: LeadStatus[] = ['nova', 'em_contato', 'qualificada', 'convertido', 'desqualificado', 'perdida']
 
 const Kanban = () => {
   const { account } = useAccount()
