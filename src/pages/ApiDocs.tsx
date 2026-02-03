@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react'
+import { useAuth } from '../context/AuthContext'
 import useAccount from '../hooks/useAccount'
 import type { ApiKey } from '../lib/apiKeys'
 import { createApiKey, listApiKeys } from '../lib/apiKeys'
 
 const ApiDocs = () => {
+  const { session } = useAuth()
   const { account } = useAccount()
   const [keys, setKeys] = useState<ApiKey[]>([])
   const [label, setLabel] = useState('')
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
+  const accessToken = session?.access_token ?? ''
 
   useEffect(() => {
     if (!account?.id) return
@@ -33,10 +36,7 @@ const ApiDocs = () => {
         </div>
       </div>
 
-      <div className="api">
-        <aside className="api__nav" aria-label="Navegação API">
-          <a className="api__link" href="#auth">Autenticação</a>
-          <a className="api__link" href="#leads">Leads</a>
+@@ -40,50 +43,59 @@ const ApiDocs = () => {
           <a className="api__link" href="#webhooks">Webhooks</a>
           <a className="api__link" href="#errors">Erros</a>
         </aside>
@@ -62,6 +62,15 @@ const ApiDocs = () => {
               Supabase Auth (ex.: <code>supabase.auth.signInWithPassword</code> ou{' '}
               <code>supabase.auth.getSession()</code>).
             </p>
+
+            <div className="api__example">
+              <span>Token atual do usuário</span>
+              {accessToken ? (
+                <p className="api__text">{accessToken}</p>
+              ) : (
+                <p className="api__text">Faça login para ver o token JWT.</p>
+              )}
+            </div>
           </div>
 
           {/* API KEY */}
