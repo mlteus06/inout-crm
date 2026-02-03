@@ -14,6 +14,7 @@ const Integrations = () => {
   const [adAccountId, setAdAccountId] = useState('')
 
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
   const facebookAppId = import.meta.env.VITE_FACEBOOK_APP_ID as string
   const facebookRedirectUri = import.meta.env.VITE_FACEBOOK_REDIRECT_URI as string
 
@@ -40,9 +41,13 @@ const Integrations = () => {
   const fetchPages = async (accountId: string) => {
     try {
       setLoadingPages(true)
-      const res = await fetch(`${supabaseUrl}/functions/v1/facebook-pages`, {
+    const res = await fetch(`${supabaseUrl}/functions/v1/facebook-pages`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${supabaseAnonKey}`,
+        apikey: supabaseAnonKey,
+      },
         body: JSON.stringify({ account_id: accountId }),
       })
       const body = await res.json().catch(() => ({}))
@@ -77,7 +82,11 @@ const Integrations = () => {
 
     fetch(`${supabaseUrl}/functions/v1/facebook-oauth-exchange`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${supabaseAnonKey}`,
+        apikey: supabaseAnonKey,
+      },
       body: JSON.stringify({ code, account_id: account.id }),
     })
       .then(async (res) => {
