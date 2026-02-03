@@ -61,7 +61,7 @@ const ApiDocs = () => {
 
             <div className="api__example">
               <span>Exemplo</span>
-              <p>Authorization: Bearer &lt;token&gt;</p>
+              <p>Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxhandudnBhcGhmbm9neGJ4ZXF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwOTc1NTcsImV4cCI6MjA4NTY3MzU1N30.Dy4f1_-4d1Q82kyIjGQrMnTND6hMY8_G0F-vRF6C-BQ;</p>
               <p>apikey: &lt;anon ou service key&gt;</p>
             </div>
 
