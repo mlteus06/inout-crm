@@ -19,6 +19,16 @@ const useAccount = () => {
       return
     }
 
+if (!data) {
+  const { data: created } = await supabase
+    .from('accounts')
+    .insert({ user_id: session.user.id })
+    .select()
+    .single()
+
+  setAccount(created)
+}
+    
     if (!mountedRef.current) return
     setLoading(true)
     const timeoutId = window.setTimeout(() => {
