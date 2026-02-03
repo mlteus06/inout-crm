@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import type { Account } from '../lib/leads'
 import { getAccountForUser } from '../lib/leads'
@@ -8,25 +8,44 @@ const useAccount = () => {
   const [account, setAccount] = useState<Account | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const mountedRef = useRef(true)
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     if (!session?.user?.id) {
+      if (!mountedRef.current) return
       setAccount(null)
+      setError(null)
       setLoading(false)
       return
     }
 
+    if (!mountedRef.current) return
     setLoading(true)
-    const { account: acct, error: fetchError } = await getAccountForUser(session.user.id)
-    setAccount(acct)
-    setError(fetchError)
-    setLoading(false)
-  }
+    const timeoutId = window.setTimeout(() => {
+      if (!mountedRef.current) return
+      setError('Tempo limite ao carregar conta.')
+      setLoading(false)
+    }, 8000)
+
+    try {
+      const { account: acct, error: fetchError } = await getAccountForUser(session.user.id)
+      if (!mountedRef.current) return
+      setAccount(acct)
+      setError(fetchError)
+    } finally {
+      window.clearTimeout(timeoutId)
+      if (!mountedRef.current) return
+      setLoading(false)
+    }
+  }, [session?.user?.id])
 
   useEffect(() => {
+    mountedRef.current = true
     refresh()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.user?.id])
+    return () => {
+      mountedRef.current = false
+    }
+  }, [refresh])
 
   return { account, loading, error, refresh }
 }
