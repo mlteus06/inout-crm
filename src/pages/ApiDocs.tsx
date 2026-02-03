@@ -35,8 +35,7 @@ const ApiDocs = () => {
           <h2>Documentação completa e amigável.</h2>
         </div>
       </div>
-
-@@ -40,50 +43,59 @@ const ApiDocs = () => {
+      
           <a className="api__link" href="#webhooks">Webhooks</a>
           <a className="api__link" href="#errors">Erros</a>
         </aside>
