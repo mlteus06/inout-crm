@@ -6,13 +6,22 @@ const supabaseServiceKey =
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
+const headers = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'content-type',
+  'Access-Control-Allow-Methods': 'POST,OPTIONS',
+}
+
 const json = (status: number, body: Record<string, unknown>) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  })
+  new Response(JSON.stringify(body), { status, headers })
+
+const cors = () => new Response(null, { status: 204, headers })
 
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return cors()
+  }
   if (req.method !== 'POST') {
     return json(405, { error: 'Método não permitido.' })
   }
