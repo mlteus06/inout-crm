@@ -148,7 +148,7 @@ const ApiDocs = () => {
           </div>
 
           <div className="api__block">
-            <p className="api__title">PATCH /leads/:id/status</p>
+            <p className="api__title">POST /leads/:id/status</p>
             <p className="api__text">
               Mova o lead entre os quadros (altere o status).
             </p>
