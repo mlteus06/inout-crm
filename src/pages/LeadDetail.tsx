@@ -79,6 +79,8 @@ const LeadDetail = () => {
             <option value="nova">Nova</option>
             <option value="em_contato">Em contato</option>
             <option value="qualificada">Qualificada</option>
+            <option value="convertido">Convertido</option>
+            <option value="desqualificado">Desqualificado</option>
             <option value="perdida">Perdida</option>
           </select>
           <button className="btn btn--primary" type="button" onClick={handleUpdate}>
