@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 
-export type LeadStatus = 'nova' | 'em_contato' | 'qualificada' | 'perdida'
+export type LeadStatus = 'nova' | 'em_contato' | 'qualificada' | 'convertido' | 'desqualificado' | 'perdida'
 
 export type Lead = {
   id: string
