@@ -89,7 +89,7 @@ const ApiDocs = () => {
           </div>
           <div id="leads" className="api__block">
             <p className="api__title">POST /leads</p>
-              </>
+              </div>
             )}
           </div>
           <div id="leads" className="api__block">
