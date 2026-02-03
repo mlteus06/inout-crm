@@ -10,6 +10,8 @@ const statusLabel: Record<LeadStatus, string> = {
   nova: 'Nova',
   em_contato: 'Em contato',
   qualificada: 'Qualificada',
+  convertido: 'Convertido',
+  desqualificado: 'Desqualificado',
   perdida: 'Perdida',
 }
 
