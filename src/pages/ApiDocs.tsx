@@ -18,7 +18,6 @@ const ApiDocs = () => {
     event.preventDefault()
     if (!account?.id) return
     const created = await createApiKey(account.id, label || 'Chave principal')
-
     if (created) {
       setKeys((prev) => [created, ...prev])
       setLabel('')
@@ -84,3 +83,42 @@ const ApiDocs = () => {
           </div>
           <div id="leads" className="api__block">
             <p className="api__title">POST /leads</p>
+            <p className="api__text">
+              Endpoint: <strong>{supabaseUrl}/functions/v1/public-api</strong>
+            </p>
+            <div className="api__example">
+              <span>Payload</span>
+              <p>name, email, phone, notes, source, status</p>
+            </div>
+          </div>
+          <div className="api__block">
+            <p className="api__title">GET /leads</p>
+            <p className="api__text">Liste leads com filtros por status e origem.</p>
+            <div className="api__example">
+              <span>Query</span>
+              <p>?status=qualificada&amp;source=Facebook&amp;limit=50</p>
+            </div>
+          </div>
+          <div id="webhooks" className="api__block">
+            <p className="api__title">POST /webhooks</p>
+            <p className="api__text">Receba eventos de integrações externas.</p>
+            <div className="api__example">
+              <span>Evento</span>
+              <p>lead.created</p>
+            </div>
+          </div>
+          <div id="errors" className="api__block">
+            <p className="api__title">Erros</p>
+            <p className="api__text">Respostas seguem padrão JSON com message e code.</p>
+            <div className="api__example">
+              <span>Exemplo</span>
+              <p>{'{'}&quot;error&quot;: &quot;Unauthorized&quot;{'}'}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+export default ApiDocs
