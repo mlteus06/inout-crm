@@ -18,6 +18,16 @@ const Leads = () => {
   const [leadSource, setLeadSource] = useState('Manual')
   const [leadNotes, setLeadNotes] = useState('')
 
+    const statusLabels: Record<LeadStatus | 'todos', string> = {
+    todos: 'Todos',
+    nova: 'Nova',
+    em_contato: 'Em contato',
+    qualificada: 'Qualificada',
+    convertido: 'Convertido',
+    desqualificado: 'Desqualificado',
+    perdida: 'Perdida',
+  }
+  
   useEffect(() => {
     if (!account?.id) return
     listLeads(account.id).then(setLeads)
