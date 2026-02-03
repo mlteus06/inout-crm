@@ -21,7 +21,7 @@ const Kanban = () => {
         acc[status] = leads.filter((lead) => lead.status === status)
         return acc
       },
-      { nova: [], em_contato: [], qualificada: [], perdida: [] },
+      { nova: [], em_contato: [], qualificada: [], convertido: [], desqualificado: [], perdida: [] },
     )
   }, [leads])
 
