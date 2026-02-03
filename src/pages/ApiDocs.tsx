@@ -18,6 +18,7 @@ const ApiDocs = () => {
     event.preventDefault()
     if (!account?.id) return
     const created = await createApiKey(account.id, label || 'Chave principal')
+
     if (created) {
       setKeys((prev) => [created, ...prev])
       setLabel('')
@@ -43,16 +44,21 @@ const ApiDocs = () => {
           <div id="auth" className="api__block">
             <p className="api__title">Autenticação</p>
             <p className="api__text">
-              Use tokens do Supabase. Base URL: <strong>{supabaseUrl}/rest/v1</strong>
+              Para acessar o <strong>REST</strong> do Supabase use o token (JWT) e o header
+              <strong> apikey</strong>. Base URL: <strong>{supabaseUrl}/rest/v1</strong>
             </p>
             <div className="api__example">
               <span>Exemplo</span>
               <p>Authorization: Bearer &lt;token&gt;</p>
+              <p>apikey: &lt;anon ou service key&gt;</p>
             </div>
           </div>
           <div className="api__block">
             <p className="api__title">API Key</p>
-            <p className="api__text">Use a chave no header <strong>x-api-key</strong> para a API pública.</p>
+            <p className="api__text">
+              Use a chave no header <strong>x-api-key</strong> apenas na função pública
+              <strong> {supabaseUrl}/functions/v1/public-api</strong>.
+            </p>
             {!account ? (
               <div className="api__example">
                 <p>Crie sua conta para gerar chaves.</p>
@@ -78,42 +84,3 @@ const ApiDocs = () => {
           </div>
           <div id="leads" className="api__block">
             <p className="api__title">POST /leads</p>
-            <p className="api__text">
-              Endpoint: <strong>{supabaseUrl}/functions/v1/public-api</strong>
-            </p>
-            <div className="api__example">
-              <span>Payload</span>
-              <p>name, email, phone, notes, source, status</p>
-            </div>
-          </div>
-          <div className="api__block">
-            <p className="api__title">GET /leads</p>
-            <p className="api__text">Liste leads com filtros por status e origem.</p>
-            <div className="api__example">
-              <span>Query</span>
-              <p>?status=qualificada&amp;source=Facebook&amp;limit=50</p>
-            </div>
-          </div>
-          <div id="webhooks" className="api__block">
-            <p className="api__title">POST /webhooks</p>
-            <p className="api__text">Receba eventos de integrações externas.</p>
-            <div className="api__example">
-              <span>Evento</span>
-              <p>lead.created</p>
-            </div>
-          </div>
-          <div id="errors" className="api__block">
-            <p className="api__title">Erros</p>
-            <p className="api__text">Respostas seguem padrão JSON com message e code.</p>
-            <div className="api__example">
-              <span>Exemplo</span>
-              <p>{'{'}&quot;error&quot;: &quot;Unauthorized&quot;{'}'}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-export default ApiDocs
