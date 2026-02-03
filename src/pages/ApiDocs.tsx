@@ -14,19 +14,51 @@ const ApiDocs = () => {
 
   useEffect(() => {
     if (!account?.id) return
-@@ -33,10 +36,7 @@ const ApiDocs = () => {
+    listApiKeys(account.id).then(setKeys)
+  }, [account?.id])
+
+  const handleCreateKey = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!account?.id) return
+    const created = await createApiKey(account.id, label || 'Chave principal')
+    if (created) {
+      setKeys((prev) => [created, ...prev])
+      setLabel('')
+    }
+  }
+
+  return (
+    <section className="page-section">
+      <div className="section__header">
+        <div>
+          <p className="eyebrow">API Docs</p>
+          <h2>Documentação completa e amigável.</h2>
         </div>
       </div>
 
-      <div className="api">
-        <aside className="api__nav" aria-label="Navegação API">
-          <a className="api__link" href="#auth">Autenticação</a>
-          <a className="api__link" href="#leads">Leads</a>
 @@ -40,50 +43,59 @@ const ApiDocs = () => {
           <a className="api__link" href="#webhooks">Webhooks</a>
           <a className="api__link" href="#errors">Erros</a>
         </aside>
-@@ -62,6 +62,15 @@ const ApiDocs = () => {
+
+        <div className="api__content">
+          {/* AUTH */}
+          <div id="auth" className="api__block">
+            <p className="api__title">Autenticação</p>
+            <p className="api__text">
+              Para acessar o <strong>REST</strong> do Supabase use o token (JWT) e o header
+              <strong> apikey</strong>. Base URL:{' '}
+              <strong>{supabaseUrl}/rest/v1</strong>
+            </p>
+
+            <div className="api__example">
+              <span>Exemplo</span>
+              <p>Authorization: Bearer &lt;token&gt;</p>
+              <p>apikey: &lt;anon ou service key&gt;</p>
+            </div>
+
+            <p className="api__text">
+              O <strong>token</strong> é o JWT da sessão do usuário: você obtém ao fazer login via
               Supabase Auth (ex.: <code>supabase.auth.signInWithPassword</code> ou{' '}
               <code>supabase.auth.getSession()</code>).
             </p>
@@ -40,6 +72,30 @@ const ApiDocs = () => {
               )}
             </div>
           </div>
+
+          {/* API KEY */}
+          <div className="api__block">
+            <p className="api__title">API Key</p>
+            <p className="api__text">
+              Use a chave no header <strong>x-api-key</strong> apenas na função pública{' '}
+              <strong>{supabaseUrl}/functions/v1/public-api</strong>.
+            </p>
+
+            {!account ? (
+              <div className="api__example">
+                <p>Crie sua conta para gerar chaves.</p>
+              </div>
+            ) : (
+              <>
+                <form className="form form--inline" onSubmit={handleCreateKey}>
+                  <input
+                    value={label}
+                    onChange={(e) => setLabel(e.target.value)}
+                    placeholder="Nome da chave"
+                  />
+                  <button className="btn btn--ghost" type="submit">
+                    Gerar chave
+                  </button>
 
           {/* API KEY */}
                 </form>
