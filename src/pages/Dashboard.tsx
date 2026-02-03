@@ -50,7 +50,7 @@ const Dashboard = () => {
         acc[lead.status] += 1
         return acc
       },
-      { nova: 0, em_contato: 0, qualificada: 0, perdida: 0 },
+      { nova: 0, em_contato: 0, qualificada: 0, convertido: 0, desqualificado: 0, perdida: 0 },
     )
 
     return byStatus
