@@ -128,21 +128,36 @@ Deno.serve(
       return json(201, { data })
     }
 
-    /* ================================
-       PATCH /public-api/leads/:id/status
-    ================================ */
-    if (
-      req.method === 'PATCH' &&
-      resourceParts.length === 3 &&
-      resourceParts[0] === 'leads' &&
-      resourceParts[2] === 'status'
-    ) {
-      const leadId = resourceParts[1]
-      const payload = await req.json().catch(() => null)
+    /* =================================
+   POST /public-api/leads/:id/status
+================================= */
+if (
+  req.method === 'POST' &&
+  resourceParts.length === 3 &&
+  resourceParts[0] === 'leads' &&
+  resourceParts[2] === 'status'
+) {
+  const leadId = resourceParts[1]
+  const payload = await req.json().catch(() => null)
 
-      if (!payload?.status || !allowedStatuses.has(payload.status)) {
-        return json(400, { error: 'status inválido.' })
-      }
+  if (!payload?.status || !allowedStatuses.has(payload.status)) {
+    return json(400, { error: 'status inválido.' })
+  }
+
+  const { data, error } = await supabase
+    .from('leads')
+    .update({ status: payload.status })
+    .eq('id', leadId)
+    .eq('account_id', accountId)
+    .select('id,name,email,phone,notes,status,source,created_at')
+    .single()
+
+  if (error) {
+    return json(400, { error: error.message })
+  }
+
+  return json(200, { data })
+}
 
       const { data, error } = await supabase
         .from('leads')
