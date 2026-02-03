@@ -20,7 +20,7 @@ const Reports = () => {
         acc[lead.status] += 1
         return acc
       },
-      { nova: 0, em_contato: 0, qualificada: 0, perdida: 0 },
+     { nova: 0, em_contato: 0, qualificada: 0, convertido: 0, desqualificado: 0, perdida: 0 },
     )
     const bySource = leads.reduce<Record<string, number>>((acc, lead) => {
       acc[lead.source] = (acc[lead.source] || 0) + 1
@@ -49,6 +49,8 @@ const Reports = () => {
             <StatCard title="Total de leads" value={stats.total} subtitle="Todas as fontes" />
             <StatCard title="Novas" value={stats.byStatus.nova} subtitle="Aguardando contato" highlight />
             <StatCard title="Qualificadas" value={stats.byStatus.qualificada} subtitle="Oportunidades" />
+            <StatCard title="Convertidas" value={stats.byStatus.convertido} subtitle="Clientes fechados" />
+            <StatCard title="Desqualificadas" value={stats.byStatus.desqualificado} subtitle="Fora do perfil" />
             <StatCard title="Perdidas" value={stats.byStatus.perdida} subtitle="Revisar motivos" />
           </div>
           <div className="panel">
