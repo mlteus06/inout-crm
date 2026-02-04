@@ -31,25 +31,38 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false)
     }, 6000)
 
-    client.auth
-      .getSession()
-      .then(({ data }) => {
+    const hydrateSession = async () => {
+      try {
+        const { data, error } = await client.auth.getSession()
+        if (error || !data.session) {
+          setSession(null)
+          return
+        }
+
+        const { data: userData, error: userError } = await client.auth.getUser()
+        if (userError || !userData.user) {
+          await client.auth.signOut()
+          setSession(null)
+          return
+        }
+
         setSession((data.session as AuthContextValue['session']) ?? null)
-        if (data.session?.user?.id && data.session?.user?.email) {
-          client.from('profiles').upsert({
+        if (data.session.user?.id && data.session.user?.email) {
+          await client.from('profiles').upsert({
             user_id: data.session.user.id,
             email: data.session.user.email,
           })
-          client.rpc('accept_invites')
+          await client.rpc('accept_invites')
         }
-      })
-      .catch(() => {
+      } catch {
         setSession(null)
-      })
-      .finally(() => {
+      } finally {
         window.clearTimeout(timeoutId)
         setLoading(false)
-      })
+      }
+    }
+
+    hydrateSession()
 
     const { data: subscription } = client.auth.onAuthStateChange(async (_event, nextSession) => {
       setSession((nextSession as AuthContextValue['session']) ?? null)
