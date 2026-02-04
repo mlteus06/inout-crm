@@ -29,12 +29,23 @@ const Dashboard = () => {
       .channel('lead-insert')
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'leads', filter: `account_id=eq.${account.id}` },
+        { event: '*', schema: 'public', table: 'leads', filter: `account_id=eq.${account.id}` },
         (payload) => {
-          const newLead = payload.new as Lead
-          setToast(`Nova lead: ${newLead.name}`)
-          setLeads((prev) => [newLead, ...prev])
-          setTimeout(() => setToast(null), 4000)
+          const newLead = payload.new as Lead | null
+          const oldLead = payload.old as Lead | null
+          if (payload.eventType === 'INSERT' && newLead) {
+            setToast(`Nova lead: ${newLead.name}`)
+            setLeads((prev) => [newLead, ...prev])
+            setTimeout(() => setToast(null), 4000)
+            return
+          }
+          if (payload.eventType === 'UPDATE' && newLead) {
+            setLeads((prev) => prev.map((lead) => (lead.id === newLead.id ? newLead : lead)))
+            return
+          }
+          if (payload.eventType === 'DELETE' && oldLead) {
+            setLeads((prev) => prev.filter((lead) => lead.id !== oldLead.id))
+          }
         },
       )
       .subscribe()
