@@ -4,6 +4,7 @@ import LeadCard from '../components/LeadCard'
 import useAccount from '../hooks/useAccount'
 import type { Lead, LeadStatus } from '../lib/leads'
 import { createLead, listLeads } from '../lib/leads'
+import { supabase } from '../lib/supabase'
 
 const Leads = () => {
   const { account } = useAccount()
@@ -31,6 +32,37 @@ const Leads = () => {
   useEffect(() => {
     if (!account?.id) return
     listLeads(account.id).then(setLeads)
+  }, [account?.id])
+
+  useEffect(() => {
+    if (!account?.id || !supabase) return
+
+    const channel = supabase
+      .channel(`leads-updates-${account.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'leads', filter: `account_id=eq.${account.id}` },
+        (payload) => {
+          const newLead = payload.new as Lead | null
+          const oldLead = payload.old as Lead | null
+          if (payload.eventType === 'INSERT' && newLead) {
+            setLeads((prev) => (prev.some((lead) => lead.id === newLead.id) ? prev : [newLead, ...prev]))
+            return
+          }
+          if (payload.eventType === 'UPDATE' && newLead) {
+            setLeads((prev) => prev.map((lead) => (lead.id === newLead.id ? newLead : lead)))
+            return
+          }
+          if (payload.eventType === 'DELETE' && oldLead) {
+            setLeads((prev) => prev.filter((lead) => lead.id !== oldLead.id))
+          }
+        },
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [account?.id])
 
   const filtered = useMemo(() => {
@@ -83,21 +115,25 @@ const Leads = () => {
             <input value={leadPhone} onChange={(event) => setLeadPhone(event.target.value)} placeholder="Telefone" />
             <input value={leadSource} onChange={(event) => setLeadSource(event.target.value)} placeholder="Origem" />
             <input value={leadNotes} onChange={(event) => setLeadNotes(event.target.value)} placeholder="Notas" />
-            <button className="btn btn--primary" type="submit">Salvar lead</button>
+            <button className="btn btn--primary" type="submit">
+              Salvar lead
+            </button>
           </form>
 
           <div className="toolbar">
             <div className="toolbar__filters">
-            {(['todos', 'nova', 'em_contato', 'qualificada', 'convertido', 'desqualificado', 'perdida'] as const).map((status) => (
-                <button
-                  key={status}
-                  type="button"
-                  className={`btn btn--ghost ${filter === status ? 'is-active' : ''}`}
-                  onClick={() => setFilter(status)}
-                >
-                  {statusLabels[status]}
-                </button>
-              ))}
+              {(['todos', 'nova', 'em_contato', 'qualificada', 'convertido', 'desqualificado', 'perdida'] as const).map(
+                (status) => (
+                  <button
+                    key={status}
+                    type="button"
+                    className={`btn btn--ghost ${filter === status ? 'is-active' : ''}`}
+                    onClick={() => setFilter(status)}
+                  >
+                    {statusLabels[status]}
+                  </button>
+                ),
+              )}
             </div>
             <input
               className="toolbar__search"
