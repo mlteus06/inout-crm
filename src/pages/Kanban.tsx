@@ -3,6 +3,7 @@ import KanbanColumn from '../components/KanbanColumn'
 import useAccount from '../hooks/useAccount'
 import type { Lead, LeadStatus } from '../lib/leads'
 import { listLeads, updateLeadStatus } from '../lib/leads'
+import { supabase } from '../lib/supabase'
 
 const statuses: LeadStatus[] = ['nova', 'em_contato', 'qualificada', 'convertido', 'desqualificado', 'perdida']
 
@@ -13,6 +14,37 @@ const Kanban = () => {
   useEffect(() => {
     if (!account?.id) return
     listLeads(account.id).then(setLeads)
+  }, [account?.id])
+
+    useEffect(() => {
+    if (!account?.id || !supabase) return
+
+    const channel = supabase
+      .channel(`kanban-updates-${account.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'leads', filter: `account_id=eq.${account.id}` },
+        (payload) => {
+          const newLead = payload.new as Lead | null
+          const oldLead = payload.old as Lead | null
+          if (payload.eventType === 'INSERT' && newLead) {
+            setLeads((prev) => (prev.some((lead) => lead.id === newLead.id) ? prev : [newLead, ...prev]))
+            return
+          }
+          if (payload.eventType === 'UPDATE' && newLead) {
+            setLeads((prev) => prev.map((lead) => (lead.id === newLead.id ? newLead : lead)))
+            return
+          }
+          if (payload.eventType === 'DELETE' && oldLead) {
+            setLeads((prev) => prev.filter((lead) => lead.id !== oldLead.id))
+          }
+        },
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [account?.id])
 
   const grouped = useMemo(() => {
